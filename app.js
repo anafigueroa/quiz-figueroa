@@ -38,6 +38,23 @@ app.use(function(req, res, next){
   next();
 });
 
+//Función de autologout
+app.use(function(req, res, next){
+  if (req.session.user){    // Verifica que exista una sesión activa
+    if(!req.session.ultimaSolicitud){ // Si es la primera solicitud se guarda la hora
+      req.session.ultimaSolicitud = (new Date()).getTime();
+    } else {
+      if((new Date()).getTime() - req.session.ultimaSolicitud > 120000){  // Si han pasado más de 2 minutos se cierra la sesión
+        delete req.session.user;
+        delete req.session.ultimaSolicitud;
+      } else {
+        req.session.ultimaSolicitud = (new Date()).getTime();
+      }
+    }
+  }
+  next();
+});
+
 app.use('/', routes);
 
 // catch 404 and forward to error handler
